@@ -19,6 +19,20 @@ let documentUri: string;
 let client: any;
 let schemaUri: string;
 
+async function openFile(filename: string, languageId = 'toml'): Promise<void> {
+  const escaped = await workspace.nvim.call('fnameescape', [filename]);
+  await workspace.nvim.command(`edit! ${escaped}`);
+  await workspace.nvim.command(`setlocal filetype=${languageId}`);
+  const uri = Uri.file(filename).toString();
+  const end = Date.now() + 5000;
+  while (Date.now() < end) {
+    const doc = await workspace.document;
+    if (doc.uri === uri && doc.languageId === languageId) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.fail(`Coc did not attach the ${languageId} document: ${filename}`);
+}
+
 async function statusUntil(
   check: (status: any) => boolean,
   uri = documentUri,
@@ -37,13 +51,10 @@ before(async () => {
   directory = await fs.mkdtemp(path.join(os.tmpdir(), 'coc-toml-integration-'));
   const filename = path.join(directory, 'sample.toml');
   await fs.writeFile(filename, 'name="sample"\n');
-  const escaped = await workspace.nvim.call('fnameescape', [filename]);
-  await workspace.nvim.command(`edit ${escaped}`);
-  await workspace.nvim.command('setfiletype toml');
+  await openFile(filename);
   documentUri = Uri.file(filename).toString();
   client = services.getService('tombi')?.client;
   assert.ok(client, 'extension should register a real Tombi client');
-  await client.start();
   await client.onReady();
   await statusUntil((status) => status.tomlVersion === 'v1.1.0');
   const schemaFile = path.join(directory, 'schema.json');
@@ -123,9 +134,7 @@ test('keeps the original document when the active buffer changes during schema s
     return sendNotification.call(this, method, params);
   };
   window.showQuickpick = async (items: string[]) => {
-    const escaped = await workspace.nvim.call('fnameescape', [otherFile]);
-    await workspace.nvim.command(`edit! ${escaped}`);
-    await workspace.nvim.command('setfiletype toml');
+    await openFile(otherFile);
     assert.equal(
       (await workspace.document).uri,
       Uri.file(otherFile).toString(),
@@ -146,11 +155,7 @@ test('keeps the original document when the active buffer changes during schema s
   } finally {
     window.showQuickpick = original;
     client.sendNotification = sendNotification;
-    const escaped = await workspace.nvim.call('fnameescape', [
-      Uri.parse(documentUri).fsPath,
-    ]);
-    await workspace.nvim.command(`edit! ${escaped}`);
-    await workspace.nvim.command('setfiletype toml');
+    await openFile(Uri.parse(documentUri).fsPath);
   }
 });
 
@@ -160,10 +165,7 @@ test('replays Coc settings and user schemas after restarting the real server', a
   const versionFile = path.join(directory, 'version.toml');
   await fs.writeFile(versionFile, 'name="version"\n');
   const versionUri = Uri.file(versionFile).toString();
-  const escaped = await workspace.nvim.call('fnameescape', [versionFile]);
-  await workspace.nvim.command(`edit! ${escaped}`);
-  await workspace.nvim.command('setfiletype toml');
-  assert.equal((await workspace.document).languageId, 'toml');
+  await openFile(versionFile);
   await workspace
     .getConfiguration()
     .update('tombi.tomlVersion', 'v1.1.0', ConfigurationTarget.Global);
@@ -221,15 +223,23 @@ test('replays Coc settings and user schemas after restarting the real server', a
 });
 
 test('does not ask for a schema when the active document is not TOML', async () => {
-  await workspace.nvim.command('setfiletype text');
+  const filename = Uri.parse((await workspace.document).uri).fsPath;
+  await openFile(filename, 'text');
   const original = window.showQuickpick;
+  let prompted = false;
   window.showQuickpick = async () => {
-    assert.fail('Should reject non-TOML documents before selection');
+    prompted = true;
+    return -1;
   };
   try {
     await selectSchema(client)();
+    assert.equal(
+      prompted,
+      false,
+      'Should reject non-TOML documents before selection',
+    );
   } finally {
     window.showQuickpick = original;
-    await workspace.nvim.command('setfiletype toml');
+    await openFile(filename);
   }
 });
