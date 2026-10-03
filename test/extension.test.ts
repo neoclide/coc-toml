@@ -79,6 +79,31 @@ before(async () => {
 });
 
 after(async () => {
+  // Detach fixture buffers while the editor is alive. Configuration changes and
+  // server shutdown can finish pending diagnostic pulls that otherwise race
+  // the test runner closing Vim's RPC connection.
+  const documents = workspace.documents.filter((doc) =>
+    Uri.parse(doc.uri).fsPath.startsWith(`${directory}${path.sep}`),
+  );
+  for (const doc of documents) {
+    await workspace.nvim.command(`bwipeout! ${doc.bufnr}`);
+  }
+  const isOpen = () =>
+    documents.some(
+      (doc) =>
+        workspace.getDocument(doc.uri) ||
+        window.visibleTextEditors.some(
+          (editor) => editor.document.uri === doc.uri,
+        ),
+    );
+  const closeEnd = Date.now() + 5000;
+  while (isOpen() && Date.now() < closeEnd) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.ok(
+    !isOpen(),
+    'Coc should detach fixture documents before shutting down',
+  );
   await workspace
     .getConfiguration()
     .update('tombi.schemas', undefined, ConfigurationTarget.Global);
