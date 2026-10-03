@@ -111,6 +111,9 @@ after(async () => {
     .getConfiguration()
     .update('tombi.tomlVersion', undefined, ConfigurationTarget.Global);
   await client?.stop();
+  // Round-trip after shutdown so Vim finishes RPCs already queued by a
+  // diagnostic refresh before coc-test closes the transport.
+  await workspace.nvim.eval('1');
   if (directory) await fs.rm(directory, { recursive: true, force: true });
 });
 
