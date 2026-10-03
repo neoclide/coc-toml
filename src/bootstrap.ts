@@ -69,7 +69,7 @@ export async function findTombiBinary(
     return { command: binPath, args: [], source: 'downloaded' };
   } catch (e) {
     window.showErrorMessage(
-      `Failed to download tombi: ${e}. Install manually with \`npm install -g @tombi-toml/tombi\` or set \`tombi.path\`.`,
+      `Failed to download tombi: ${e}. Install manually with \`npm install -g @tombi-toml/cli\` or set \`tombi.path\`.`,
     );
     return null;
   }

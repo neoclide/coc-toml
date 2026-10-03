@@ -1,5 +1,7 @@
 # coc-toml
 
+[![Tests](https://github.com/neoclide/coc-toml/actions/workflows/ci.yml/badge.svg)](https://github.com/neoclide/coc-toml/actions/workflows/ci.yml)
+
 [![npm version](https://badge.fury.io/js/coc-toml.svg)](https://badge.fury.io/js/coc-toml)
 
 TOML language server extension for [coc.nvim](https://github.com/neoclide/coc.nvim).
@@ -166,3 +168,17 @@ MIT.
 
 - [Tombi](https://github.com/tombi-toml/tombi) — TOML language server
 - [coc.nvim](https://github.com/neoclide/coc.nvim)
+
+## Development tests
+
+Use the package manager pinned in `package.json`:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm build
+pnpm typecheck
+pnpm test:integration:nvim
+pnpm test:integration:vim
+```
+
+The integration suite runs real editors, coc.nvim and the pinned development-only Tombi CLI. It covers activation, formatting, configuration, local schema selection and restart replay. Set `COC_TEST_COC_PATH` to use a local coc.nvim checkout. The existing `pnpm test` Docker smoke suite is retained separately.

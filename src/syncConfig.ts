@@ -11,7 +11,7 @@ function buildTombiSettings(): Record<string, unknown> {
   };
 }
 
-async function pushSettings(client: LanguageClient): Promise<void> {
+export async function pushSettings(client: LanguageClient): Promise<void> {
   try {
     await client.sendNotification(DID_CHANGE_CONFIGURATION, {
       settings: buildTombiSettings(),

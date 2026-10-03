@@ -4,18 +4,24 @@ on:
   push:
     branches:
       - main
+      - 'codex/**'
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
       fail-fast: false
       matrix:
         node-version: [22, 24]
+        editor: [nvim, vim]
 
     env:
       NODE_ENV: test
@@ -23,6 +29,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -41,3 +49,12 @@ jobs:
 
       - name: Check format
         run: pnpm prettier
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Install editors
+        run: sudo apt-get update && sudo apt-get install -y neovim vim
+
+      - name: Real Tombi integration tests
+        run: pnpm test:integration:${{ matrix.editor }}

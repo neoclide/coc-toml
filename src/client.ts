@@ -1,4 +1,5 @@
 import {
+  ExtensionContext,
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
@@ -8,7 +9,10 @@ import {
 import { TombiBin } from './bootstrap';
 import config from './config';
 
-export function createClient(tombiBin: TombiBin): LanguageClient {
+export function createClient(
+  tombiBin: TombiBin,
+  context: ExtensionContext,
+): LanguageClient {
   const args = [...tombiBin.args, 'lsp', ...config.args];
 
   const serverOpts: ServerOptions = {
@@ -25,17 +29,23 @@ export function createClient(tombiBin: TombiBin): LanguageClient {
 
   const outputChannel = window.createOutputChannel('Tombi Language Server');
 
+  const watchers = [
+    'tombi.toml',
+    '.tombi.toml',
+    'pyproject.toml',
+    'tombi/config.toml',
+  ].map((filename) => workspace.createFileSystemWatcher(`**/${filename}`));
+  context.subscriptions.push(outputChannel, ...watchers);
+
   const clientOpts: LanguageClientOptions = {
     documentSelector: [
       { scheme: 'file', language: 'toml' },
       { scheme: 'file', language: 'cargoLock' },
+      { scheme: 'untitled', language: 'toml' },
+      { scheme: 'untitled', language: 'cargoLock' },
     ],
     synchronize: {
-      fileEvents: [
-        workspace.createFileSystemWatcher('**/tombi.toml'),
-        workspace.createFileSystemWatcher('**/.tombi.toml'),
-        workspace.createFileSystemWatcher('**/pyproject.toml'),
-      ],
+      fileEvents: watchers,
     },
     outputChannel,
   };

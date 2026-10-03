@@ -16,3 +16,9 @@ yarn-error.log
 .vscode
 .idea
 .netrwhist
+
+# Development-only tests and synchronization notes
+test
+AGENTS.md
+migrate.md
+.codex
