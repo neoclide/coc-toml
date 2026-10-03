@@ -160,7 +160,10 @@ test('replays Coc settings and user schemas after restarting the real server', a
   const versionFile = path.join(directory, 'version.toml');
   await fs.writeFile(versionFile, 'name="version"\n');
   const versionUri = Uri.file(versionFile).toString();
-  await workspace.openTextDocument(versionFile);
+  const escaped = await workspace.nvim.call('fnameescape', [versionFile]);
+  await workspace.nvim.command(`edit! ${escaped}`);
+  await workspace.nvim.command('setfiletype toml');
+  assert.equal((await workspace.document).languageId, 'toml');
   await workspace
     .getConfiguration()
     .update('tombi.tomlVersion', 'v1.1.0', ConfigurationTarget.Global);
