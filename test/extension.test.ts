@@ -22,8 +22,17 @@ let schemaUri: string;
 async function openFile(filename: string, languageId = 'toml'): Promise<void> {
   const escaped = await workspace.nvim.call('fnameescape', [filename]);
   await workspace.nvim.command(`edit! ${escaped}`);
-  await workspace.nvim.command(`setlocal filetype=${languageId}`);
   const uri = Uri.file(filename).toString();
+  // Wait for Coc to attach before changing filetype. Vim can emit FileType
+  // before the asynchronous BufCreate handler has created the document.
+  const attachEnd = Date.now() + 5000;
+  let attached = await workspace.document;
+  while (attached?.uri !== uri && Date.now() < attachEnd) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    attached = await workspace.document;
+  }
+  assert.equal(attached?.uri, uri, 'Coc should attach the opened file');
+  await workspace.nvim.command(`setlocal filetype=${languageId}`);
   const end = Date.now() + 5000;
   while (Date.now() < end) {
     const doc = await workspace.document;

@@ -21,7 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [22, 24]
-        editor: [nvim, vim]
 
     env:
       NODE_ENV: test
@@ -64,24 +63,13 @@ jobs:
       - name: Install editors
         run: sudo apt-get update && sudo apt-get install -y neovim vim
 
-      - name: Real Tombi integration tests
+      - name: Real Tombi integration tests (Neovim)
         env:
           COC_TEST_COC_PATH: ${{ github.workspace }}/.coc-test-runtime
-        run: pnpm test:integration:${{ matrix.editor }}
+        run: pnpm test:integration:nvim
 
-  # Preserve required check names from the original Node-only matrix. Each
-  # check requires the complete Node/editor matrix, so no test lane is bypassed.
-  required-test:
-    name: test (${{ matrix.node-version }})
-    needs: test
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 1
-    strategy:
-      matrix:
-        node-version: [22, 24]
-    steps:
-      - name: Require all integration test jobs to pass
+      - name: Real Tombi integration tests (Vim)
+        if: ${{ !cancelled() }}
         env:
-          TEST_RESULT: ${{ needs.test.result }}
-        run: test "$TEST_RESULT" = success
+          COC_TEST_COC_PATH: ${{ github.workspace }}/.coc-test-runtime
+        run: pnpm test:integration:vim
