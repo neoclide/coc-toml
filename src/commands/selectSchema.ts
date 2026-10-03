@@ -1,9 +1,17 @@
-import { LanguageClient, window, workspace } from 'coc.nvim';
+import { LanguageClient, window, workspace, Uri } from 'coc.nvim';
 import { Methods } from '../requestExt';
 
 export function selectSchema(client: LanguageClient): any {
   return async () => {
     try {
+      const doc = await workspace.document;
+      if (
+        !['toml', 'cargoLock'].includes(doc.languageId) ||
+        Uri.parse(doc.uri).scheme !== 'file'
+      ) {
+        window.showWarningMessage('Please open a saved TOML file first.');
+        return;
+      }
       const res = await client.sendRequest<Methods.ListSchemas.Response>(
         Methods.ListSchemas.METHOD,
         {},
@@ -19,11 +27,9 @@ export function selectSchema(client: LanguageClient): any {
       if (idx === -1) return;
 
       const selected = res.schemas[idx];
-      const doc = await workspace.document;
-
       await client.sendNotification(Methods.AssociateSchema.METHOD, {
         uri: selected.uri,
-        fileMatch: [doc.uri],
+        fileMatch: [Uri.parse(doc.uri).fsPath],
         title: selected.title,
         description: selected.description,
         tomlVersion: selected.tomlVersion,

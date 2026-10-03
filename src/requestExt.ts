@@ -9,7 +9,8 @@ export namespace Methods {
       title?: string;
       description?: string;
       uri: string;
-      fileMatch: string[];
+      fileMatch?: string[];
+      catalogUri?: string;
       tomlVersion?: string;
     }
     export interface Response {

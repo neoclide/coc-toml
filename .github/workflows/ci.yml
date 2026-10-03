@@ -4,13 +4,18 @@ on:
   push:
     branches:
       - main
+      - 'codex/**'
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
       fail-fast: false
@@ -23,6 +28,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Check out coc.nvim runtime
+        uses: actions/checkout@v5
+        with:
+          repository: neoclide/coc.nvim
+          ref: release
+          path: .coc-test-runtime
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -41,3 +56,20 @@ jobs:
 
       - name: Check format
         run: pnpm prettier
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Install editors
+        run: sudo apt-get update && sudo apt-get install -y neovim vim
+
+      - name: Real Tombi integration tests (Neovim)
+        env:
+          COC_TEST_COC_PATH: ${{ github.workspace }}/.coc-test-runtime
+        run: pnpm test:integration:nvim
+
+      - name: Real Tombi integration tests (Vim)
+        if: ${{ !cancelled() }}
+        env:
+          COC_TEST_COC_PATH: ${{ github.workspace }}/.coc-test-runtime
+        run: pnpm test:integration:vim

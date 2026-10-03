@@ -8,7 +8,7 @@ import { refreshCache } from './commands/cache';
 import { showVersion } from './commands/version';
 import { selectSchema } from './commands/selectSchema';
 import { registerUserSchemas } from './userSchemas';
-import { syncConfigToServer } from './syncConfig';
+import { syncConfigToServer, pushSettings } from './syncConfig';
 
 export async function activate(context: ExtensionContext): Promise<void> {
   if (!config.enabled) {
@@ -21,7 +21,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     return;
   }
 
-  const client = createClient(tombiBin);
+  const client = createClient(tombiBin, context);
   context.subscriptions.push(services.registLanguageClient(client));
 
   registerCommand(context, client, 'refreshCache', refreshCache);
@@ -36,7 +36,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
   context.subscriptions.push(
     commands.registerCommand('tombi.restartLanguageServer', async () => {
       await client.stop();
-      client.start();
+      await client.start();
+      // Coc 0.0.82 returns a Disposable from start(), before the client is ready.
+      await client.onReady();
+      await pushSettings(client);
+      await registerUserSchemas(client, config.schemas);
       window.showInformationMessage('Tombi Language Server restarted.');
     }),
   );
