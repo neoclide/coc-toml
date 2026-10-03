@@ -37,6 +37,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     commands.registerCommand('tombi.restartLanguageServer', async () => {
       await client.stop();
       await client.start();
+      // Coc 0.0.82 returns a Disposable from start(), before the client is ready.
+      await client.onReady();
       await pushSettings(client);
       await registerUserSchemas(client, config.schemas);
       window.showInformationMessage('Tombi Language Server restarted.');
