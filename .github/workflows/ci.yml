@@ -68,3 +68,20 @@ jobs:
         env:
           COC_TEST_COC_PATH: ${{ github.workspace }}/.coc-test-runtime
         run: pnpm test:integration:${{ matrix.editor }}
+
+  # Preserve required check names from the original Node-only matrix. Each
+  # check requires the complete Node/editor matrix, so no test lane is bypassed.
+  required-test:
+    name: test (${{ matrix.node-version }})
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    strategy:
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - name: Require all integration test jobs to pass
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+        run: test "$TEST_RESULT" = success
