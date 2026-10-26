@@ -53,7 +53,7 @@
     "semi": true
   },
   "devDependencies": {
-    "@tombi-toml/cli": "1.7.1",
+    "@tombi-toml/cli": "1.8.10",
     "@types/node": "^26.0.0",
     "coc-test": "^0.2.0",
     "coc.nvim": "0.0.82",
