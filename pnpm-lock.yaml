@@ -13,13 +13,13 @@ importers:
         version: 1.7.1
       '@types/node':
         specifier: ^26.0.0
-        version: 26.2.0
+        version: 26.6.6
       coc-test:
         specifier: ^0.2.0
         version: 0.2.0
       coc.nvim:
         specifier: 0.0.82
-        version: 0.0.82(@types/node@26.2.0)(typescript@7.0.2)
+        version: 0.0.82(@types/node@26.6.6)(typescript@7.0.2)
       esbuild:
         specifier: ^0.28.0
         version: 0.28.2
@@ -269,8 +269,8 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
-  '@types/node@26.2.0':
-    resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
+  '@types/node@26.6.6':
+    resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -1007,8 +1007,8 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
-  undici-types@8.3.0:
-    resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
+  undici-types@8.9.0:
+    resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
@@ -1164,9 +1164,9 @@ snapshots:
       '@tombi-toml/cli-win32-arm64': 1.7.1
       '@tombi-toml/cli-win32-x64': 1.7.1
 
-  '@types/node@26.2.0':
+  '@types/node@26.6.6':
     dependencies:
-      undici-types: 8.3.0
+      undici-types: 8.9.0
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
@@ -1299,9 +1299,9 @@ snapshots:
       fast-glob: 3.3.3
       fflate: 0.8.3
 
-  coc.nvim@0.0.82(@types/node@26.2.0)(typescript@7.0.2):
+  coc.nvim@0.0.82(@types/node@26.6.6)(typescript@7.0.2):
     dependencies:
-      '@types/node': 26.2.0
+      '@types/node': 26.6.6
       typescript: 7.0.2
 
   color-convert@1.9.3:
@@ -2043,7 +2043,7 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
-  undici-types@8.3.0: {}
+  undici-types@8.9.0: {}
 
   validate-npm-package-license@3.0.4:
     dependencies:
